@@ -8,6 +8,7 @@ import br.com.kevinaryel.bibliosystem.request.ClientCreateRequest;
 import br.com.kevinaryel.bibliosystem.request.ClientEditRequest;
 import br.com.kevinaryel.bibliosystem.response.ClientResponse;
 import br.com.kevinaryel.bibliosystem.response.PageResponse;
+import br.com.kevinaryel.bibliosystem.utils.Validate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,46 +27,14 @@ import java.util.Optional;
 public class ClientService {
     private final ObjectMapper objectMapper;
     private final ClientRepository clientRepository;
+    private final Validate validate = new Validate();
 
-    private void validateName(String name) throws BusinessRuleException {
-        if ( name != null){
-            if (name.length() >= 10 ) {
-                return;
-            }
-        }
-        throw new BusinessRuleException("Erro no nome do cliente");
-    }
-    private void validateEmail(String email) throws BusinessRuleException{
-        if (email != null){
-            if (email.matches("^([\\w-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([\\w-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$" )){
-                return;
-            }
-        }
-        throw new BusinessRuleException("Erro no campo email");
-    }
-    private void validateGender(Character gender) throws BusinessRuleException {
-        if (gender != null){
-            if (gender.equals('M')||gender.equals('F')||gender.equals('O')){
-                return;
-            }
-        }
-        throw new BusinessRuleException("Erro no campo gender");
-    }
-    private void validateDocument(String document) throws BusinessRuleException {
-        if (document != null){
-            boolean exists = clientRepository.existsByDocument(document);
-            if (document.matches("[0-9]{11,13}")&& !exists){
-                return;
-            }
-        }
-        throw new BusinessRuleException("Erro no campo document");
-    }
     @Transactional
     public ResponseEntity<ClientResponse> create(ClientCreateRequest client) throws BusinessRuleException {
-        validateName(client.getName());
-        validateEmail(client.getEmail());
-        validateGender(client.getGender());
-        validateDocument(client.getDocument());
+        validate.validateName(client.getName());
+        validate.validateEmail(client.getEmail());
+        validate.validateGender(client.getGender());
+        validate.validateDocument(client.getDocument(),clientRepository);
         ClientEntity clientEntity = objectMapper.convertValue(client, ClientEntity.class);
         ClientEntity clientSaved = clientRepository.save(clientEntity);
         ClientResponse clientResponse = objectMapper.convertValue(clientSaved, ClientResponse.class);
@@ -74,9 +43,9 @@ public class ClientService {
     @Transactional
     public ResponseEntity<ClientResponse> edit(Integer id, ClientEditRequest client) throws NotFoundException, BusinessRuleException {
         ClientEntity clientSaved = getClientById(id);
-        validateName(client.getName());
-        validateEmail(client.getEmail());
-        validateGender(client.getGender());
+        validate.validateName(client.getName());
+        validate.validateEmail(client.getEmail());
+        validate.validateGender(client.getGender());
         clientSaved.setName(client.getName());
         clientSaved.setEmail(client.getEmail());
         clientSaved.setGender(client.getGender());
