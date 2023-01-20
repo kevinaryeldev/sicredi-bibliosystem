@@ -37,7 +37,7 @@ public class ClientService {
     }
     private void validateEmail(String email) throws BusinessRuleException{
         if (email != null){
-            if (!email.isBlank() && email.matches("^(?=.{1,64}@)[A-Za-z0-9_-]+(\\\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\\\.[A-Za-z0-9-]+)*(\\\\.[A-Za-z]{2,})$" )){
+            if (email.matches("^([\\w-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([\\w-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$" )){
                 return;
             }
         }
@@ -51,10 +51,10 @@ public class ClientService {
         }
         throw new BusinessRuleException("Erro no campo gender");
     }
-    private void validateDocument(Integer document) throws BusinessRuleException {
+    private void validateDocument(String document) throws BusinessRuleException {
         if (document != null){
-            Integer repositoryDocument = clientRepository.findByDocument(document).getDocument();
-            if (document.toString().length() >= 11 || repositoryDocument == document){
+            boolean exists = clientRepository.existsByDocument(document);
+            if (document.matches("[0-9]{11,13}")&& !exists){
                 return;
             }
         }
@@ -64,8 +64,8 @@ public class ClientService {
     public ResponseEntity<ClientResponse> create(ClientCreateRequest client) throws BusinessRuleException {
         validateName(client.getName());
         validateEmail(client.getEmail());
-//        validateGender(client.getGender());
-//        validateDocument(client.getDocument());
+        validateGender(client.getGender());
+        validateDocument(client.getDocument());
         ClientEntity clientEntity = objectMapper.convertValue(client, ClientEntity.class);
         ClientEntity clientSaved = clientRepository.save(clientEntity);
         ClientResponse clientResponse = objectMapper.convertValue(clientSaved, ClientResponse.class);
