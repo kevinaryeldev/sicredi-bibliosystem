@@ -7,7 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ClientRepository extends JpaRepository<ClientEntity,Integer> {
-    @Query(value = "SELECT 1 FROM CLIENT WHERE DOCUMENT = :document",
-    nativeQuery = true)
-    ClientEntity findByDocument(Integer document);
+    boolean existsByDocument(Integer document);
 }
