@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ClientRepository extends JpaRepository<ClientEntity,Integer> {
-    boolean existsByDocument(Integer document);
+    boolean existsByDocument(String document);
 }

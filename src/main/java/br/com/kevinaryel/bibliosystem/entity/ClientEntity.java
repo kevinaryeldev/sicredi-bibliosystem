@@ -26,7 +26,7 @@ public class ClientEntity {
     @Column(name = "name")
     private String name;
     @Column(name = "document")
-    private Integer document;
+    private String document;
     @Column(name="email")
     private String email;
     @Column(name="gender")

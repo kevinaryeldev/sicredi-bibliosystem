@@ -1,6 +1,6 @@
 package br.com.kevinaryel.bibliosystem.request;
 
-import lombok.Data;
+import lombok.*;
 
 @Data
 public class ClientEditRequest {
