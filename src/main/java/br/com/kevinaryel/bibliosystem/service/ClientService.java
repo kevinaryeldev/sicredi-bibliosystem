@@ -1,10 +1,15 @@
 package br.com.kevinaryel.bibliosystem.service;
 
 import br.com.kevinaryel.bibliosystem.entity.ClientEntity;
+import br.com.kevinaryel.bibliosystem.exception.BusinessRuleException;
+import br.com.kevinaryel.bibliosystem.exception.NotFoundException;
 import br.com.kevinaryel.bibliosystem.repository.ClientRepository;
+import br.com.kevinaryel.bibliosystem.request.ClientCreateRequest;
+import br.com.kevinaryel.bibliosystem.request.ClientEditRequest;
 import br.com.kevinaryel.bibliosystem.response.ClientResponse;
 import br.com.kevinaryel.bibliosystem.response.PageResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +27,62 @@ public class ClientService {
     private final ObjectMapper objectMapper;
     private final ClientRepository clientRepository;
 
+    private void validateName(String name) throws BusinessRuleException {
+        if ( name != null){
+            if (name.length() >= 10 ) {
+                return;
+            }
+        }
+        throw new BusinessRuleException("Erro no nome do cliente");
+    }
+    private void validateEmail(String email) throws BusinessRuleException{
+        if (email != null){
+            if (!email.isBlank() && email.matches("^(?=.{1,64}@)[A-Za-z0-9_-]+(\\\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\\\.[A-Za-z0-9-]+)*(\\\\.[A-Za-z]{2,})$" )){
+                return;
+            }
+        }
+        throw new BusinessRuleException("Erro no campo email");
+    }
+    private void validateGender(Character gender) throws BusinessRuleException {
+        if (gender != null){
+            if (gender.equals('M')||gender.equals('F')||gender.equals('O')){
+                return;
+            }
+        }
+        throw new BusinessRuleException("Erro no campo gender");
+    }
+    private void validateDocument(Integer document) throws BusinessRuleException {
+        if (document != null){
+            Integer repositoryDocument = clientRepository.findByDocument(document).getDocument();
+            if (document.toString().length() >= 11 || repositoryDocument == document){
+                return;
+            }
+        }
+        throw new BusinessRuleException("Erro no campo document");
+    }
+    @Transactional
+    public ResponseEntity<ClientResponse> create(ClientCreateRequest client) throws BusinessRuleException {
+        validateName(client.getName());
+        validateEmail(client.getEmail());
+//        validateGender(client.getGender());
+//        validateDocument(client.getDocument());
+        ClientEntity clientEntity = objectMapper.convertValue(client, ClientEntity.class);
+        ClientEntity clientSaved = clientRepository.save(clientEntity);
+        ClientResponse clientResponse = objectMapper.convertValue(clientSaved, ClientResponse.class);
+        return new ResponseEntity<>(clientResponse,HttpStatus.CREATED);
+    }
+    @Transactional
+    public ResponseEntity<ClientResponse> edit(Integer id, ClientEditRequest client) throws NotFoundException, BusinessRuleException {
+        ClientEntity clientSaved = getClientById(id);
+        validateName(client.getName());
+        validateEmail(client.getEmail());
+        validateGender(client.getGender());
+        clientSaved.setName(client.getName());
+        clientSaved.setEmail(client.getEmail());
+        clientSaved.setGender(client.getGender());
+        ClientResponse clientResponse = objectMapper.convertValue(clientRepository.save(clientSaved), ClientResponse.class);
+        return new ResponseEntity<>(clientResponse, HttpStatus.OK);
+    }
     public ResponseEntity<PageResponse<ClientResponse>> list(Integer page, Integer size){
         if(page==null){
             page=0;
@@ -39,5 +101,23 @@ public class ClientService {
         PageResponse<ClientResponse> pageResponse = new PageResponse<>(repositoryPage.getTotalElements(),
                 repositoryPage.getTotalPages(), page,size,clientList);
         return new ResponseEntity<>(pageResponse, HttpStatus.OK);
+    }
+    private ClientEntity getClientById(Integer id) throws NotFoundException {
+        Optional<ClientEntity> clientOpt = clientRepository.findById(id);
+        if(clientOpt.isEmpty()){
+            throw new NotFoundException("Cliente não encontrado");
+        }
+        return clientOpt.get();
+    }
+    @Transactional
+    public ResponseEntity<Void> delete(Integer id) throws NotFoundException {
+        getClientById(id);
+        clientRepository.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    public ResponseEntity<ClientResponse> findById(Integer id) throws NotFoundException {
+        ClientEntity client = getClientById(id);
+        ClientResponse clientResponse = objectMapper.convertValue(client, ClientResponse.class);
+        return new ResponseEntity<>(clientResponse, HttpStatus.OK);
     }
 }
