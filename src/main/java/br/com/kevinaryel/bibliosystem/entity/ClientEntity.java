@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -32,5 +32,5 @@ public class ClientEntity {
     @Column(name="gender")
     private Character gender;
     @Column(name = "birth_date")
-    private Date birth_date;
+    private LocalDate birth_date;
 }

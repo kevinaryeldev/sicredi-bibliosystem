@@ -2,7 +2,7 @@ package br.com.kevinaryel.bibliosystem.request;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDate;
 @Data
 public class ClientCreateRequest {
 
@@ -14,5 +14,5 @@ public class ClientCreateRequest {
 
     private Character gender;
 
-    private Date birthDate;
+    private LocalDate birth_date;
 }
