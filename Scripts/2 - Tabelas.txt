@@ -1,0 +1,71 @@
+
+BEGIN;
+
+CREATE TABLE IF NOT EXISTS public.client
+(
+    id serial,
+    name character varying(200) NOT NULL,
+    document character varying NOT NULL,
+    email character varying(200) NOT NULL,
+    gender "char" NOT NULL,
+    birth_date date NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS public.book
+(
+    id serial,
+    code character varying(200) NOT NULL,
+    title character varying(200) NOT NULL,
+    subtitle character varying(200) NOT NULL,
+    publisher character varying(100) NOT NULL,
+    author character varying(200) NOT NULL,
+    cdd character varying(2000) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS public.copy
+(
+    id serial,
+    year numeric(4) NOT NULL,
+    "propertyCode" numeric NOT NULL,
+    edition numeric(2) NOT NULL,
+    id_book serial NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE IF NOT EXISTS public.location
+(
+    id serial,
+    id_client serial NOT NULL,
+    id_copy serial NOT NULL,
+    "locationDate" date NOT NULL,
+    "returnDate" date NOT NULL,
+    status "char" NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE IF EXISTS public.copy
+    ADD CONSTRAINT "FK_Book" FOREIGN KEY (id_book)
+    REFERENCES public.book (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.location
+    ADD CONSTRAINT "FK_Client" FOREIGN KEY (id_client)
+    REFERENCES public.client (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public.location
+    ADD CONSTRAINT "FK_Copy" FOREIGN KEY (id_copy)
+    REFERENCES public.copy (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+END;
