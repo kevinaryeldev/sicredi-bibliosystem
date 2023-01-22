@@ -1,5 +1,5 @@
-
 BEGIN;
+
 
 CREATE TABLE IF NOT EXISTS public.client
 (
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.book
     id serial,
     code character varying(200) NOT NULL,
     title character varying(200) NOT NULL,
-    subtitle character varying(200) NOT NULL,
+    subtitle character varying(200),
     publisher character varying(100) NOT NULL,
     author character varying(200) NOT NULL,
     cdd character varying(2000) NOT NULL,
@@ -27,9 +27,9 @@ CREATE TABLE IF NOT EXISTS public.book
 CREATE TABLE IF NOT EXISTS public.copy
 (
     id serial,
-    year numeric(4) NOT NULL,
-    "propertyCode" numeric NOT NULL,
-    edition numeric(2) NOT NULL,
+    year character varying(4) NOT NULL,
+    property_code character varying(200) NOT NULL,
+    edition character varying(4) NOT NULL,
     id_book serial NOT NULL,
     PRIMARY KEY (id)
 );
