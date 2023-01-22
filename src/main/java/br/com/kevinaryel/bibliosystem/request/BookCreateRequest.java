@@ -6,7 +6,7 @@ import lombok.*;
 public class BookCreateRequest {
     private String code;
 
-    private String name;
+    private String title;
 
     private String subtitle;
 
