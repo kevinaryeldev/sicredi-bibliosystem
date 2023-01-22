@@ -22,11 +22,11 @@ public class Validate {
     }
     public void validateCdd(String cdd) throws BusinessRuleException {
         if ( cdd != null){
-            if (cdd.matches("[0-9]{1,3}?:.[0-9]{1,3}?") ) {
+            if (cdd.matches("[0-9]{1,3}(?:.[0-9]{1,3})?") ) {
                 return;
             }
         }
-        throw new BusinessRuleException("Erro no CDU do livro");
+        throw new BusinessRuleException("Erro no CDD do livro");
     }
     public void validateEmail(String email) throws BusinessRuleException{
         if (email != null){
