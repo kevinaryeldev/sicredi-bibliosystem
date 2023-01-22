@@ -36,6 +36,6 @@ public class BookEntity {
     @Column(name = "author")
     private String author;
 
-    @Column(name = "cdu")
+    @Column(name = "cdd")
     private String cdd;
 }
