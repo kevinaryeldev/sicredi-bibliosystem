@@ -31,7 +31,7 @@ public class BookService {
 
     @Transactional
     public ResponseEntity<BookResponse> create(BookCreateRequest book) throws BusinessRuleException {
-        validate.validateName(book.getTitle());
+        validate.validateString(book.getTitle());
         validate.validateName(book.getAuthor());
         validate.validateName(book.getPublisher());
         validate.validateIsbn(book.getCode());
