@@ -25,7 +25,7 @@ public class BookEntity {
     private String code;
 
     @Column(name = "title")
-    private String name;
+    private String title;
 
     @Column(name =  "subtitle")
     private String subtitle;
@@ -36,6 +36,6 @@ public class BookEntity {
     @Column(name = "author")
     private String author;
 
-    @Column(name = "cdd")
+    @Column(name = "cdu")
     private String cdd;
 }
