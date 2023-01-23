@@ -34,13 +34,13 @@ CREATE TABLE IF NOT EXISTS public.copy
     PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.location
+CREATE TABLE IF NOT EXISTS public.loan
 (
     id serial,
     id_client serial NOT NULL,
     id_copy serial NOT NULL,
-    "locationDate" date NOT NULL,
-    "returnDate" date NOT NULL,
+    loan_date date NOT NULL,
+    return_date date NOT NULL,
     status "char" NOT NULL,
     PRIMARY KEY (id)
 );
@@ -53,7 +53,7 @@ ALTER TABLE IF EXISTS public.copy
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.location
+ALTER TABLE IF EXISTS public.loan
     ADD CONSTRAINT "FK_Client" FOREIGN KEY (id_client)
     REFERENCES public.client (id) MATCH SIMPLE
     ON UPDATE NO ACTION
@@ -61,7 +61,7 @@ ALTER TABLE IF EXISTS public.location
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.location
+ALTER TABLE IF EXISTS public.loan
     ADD CONSTRAINT "FK_Copy" FOREIGN KEY (id_copy)
     REFERENCES public.copy (id) MATCH SIMPLE
     ON UPDATE NO ACTION
