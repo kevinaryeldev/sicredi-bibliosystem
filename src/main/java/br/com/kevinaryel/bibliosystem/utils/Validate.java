@@ -2,8 +2,17 @@ package br.com.kevinaryel.bibliosystem.utils;
 
 import br.com.kevinaryel.bibliosystem.exception.BusinessRuleException;
 import br.com.kevinaryel.bibliosystem.repository.ClientRepository;
+import br.com.kevinaryel.bibliosystem.repository.CopyRepository;
 
 public class Validate {
+    public void validateIdCopy(Integer id_copy, CopyRepository repository) throws BusinessRuleException {
+        if (id_copy != null){
+            if (repository.existsById(id_copy)) {
+                return;
+            }
+        }
+        throw new BusinessRuleException("Erro no id da cópia");
+    }
     public void validateEdition(String edition) throws BusinessRuleException {
         if (edition != null){
             if (edition.matches("[0-9]{1,2}") ) {
@@ -76,5 +85,14 @@ public class Validate {
             }
         }
         throw new BusinessRuleException("Erro no campo document");
+    }
+
+    public void validateIdClient(Integer id_client, ClientRepository clientRepository) throws BusinessRuleException {
+        if (id_client != null){
+            if (clientRepository.existsById(id_client)) {
+                return;
+            }
+        }
+        throw new BusinessRuleException("Erro no id do cliente");
     }
 }
