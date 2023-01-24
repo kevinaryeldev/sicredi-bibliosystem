@@ -1,9 +1,11 @@
-package br.com.kevinaryel.bibliosystem.utils;
+package br.com.kevinaryel.bibliosystem.utils.validate;
 
 import br.com.kevinaryel.bibliosystem.exception.BusinessRuleException;
 import br.com.kevinaryel.bibliosystem.repository.ClientRepository;
 import br.com.kevinaryel.bibliosystem.repository.CopyRepository;
+import org.springframework.stereotype.Component;
 
+@Component("validate")
 public class Validate {
     public void validateIdCopy(Integer id_copy, CopyRepository repository) throws BusinessRuleException {
         if (id_copy != null){
