@@ -7,7 +7,7 @@ import br.com.kevinaryel.bibliosystem.repository.BookRepository;
 import br.com.kevinaryel.bibliosystem.request.BookCreateRequest;
 import br.com.kevinaryel.bibliosystem.response.BookResponse;
 import br.com.kevinaryel.bibliosystem.response.PageResponse;
-import br.com.kevinaryel.bibliosystem.utils.Validate;
+import br.com.kevinaryel.bibliosystem.utils.validate.Validate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final ObjectMapper objectMapper;
-    private final Validate validate = new Validate();
+    private final Validate validate;
 
     @Transactional
     public ResponseEntity<BookResponse> create(BookCreateRequest book) throws BusinessRuleException {

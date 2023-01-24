@@ -9,7 +9,7 @@ import br.com.kevinaryel.bibliosystem.request.CopyCreateRequest;
 import br.com.kevinaryel.bibliosystem.response.CopyResponse;
 import br.com.kevinaryel.bibliosystem.response.CopyWithBookDetailsResponse;
 import br.com.kevinaryel.bibliosystem.response.PageResponse;
-import br.com.kevinaryel.bibliosystem.utils.Validate;
+import br.com.kevinaryel.bibliosystem.utils.validate.Validate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class CopyService {
     private final BookRepository bookRepository;
     private final ObjectMapper objectMapper;
 
-    private final Validate validate = new Validate();
+    private final Validate validate;
 
     private void checkIdBook(Integer id) throws NotFoundException{
         if ( id != null){
