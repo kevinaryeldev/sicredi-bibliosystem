@@ -11,7 +11,7 @@ import br.com.kevinaryel.bibliosystem.response.ClientResponse;
 import br.com.kevinaryel.bibliosystem.response.CopyResponse;
 import br.com.kevinaryel.bibliosystem.response.LoanResponse;
 import br.com.kevinaryel.bibliosystem.response.PageResponse;
-import br.com.kevinaryel.bibliosystem.utils.Validate;
+import br.com.kevinaryel.bibliosystem.utils.validate.Validate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class LoanService {
     private final ClientRepository clientRepository;
     private final CopyRepository copyRepository;
     private final ObjectMapper objectMapper;
-    private final Validate validate = new Validate();
+    private final Validate validate;
 
     private LoanResponse generateLoanResponse(LoanEntity loanSaved) {
         LoanResponse loanResponse = objectMapper.convertValue(loanSaved, LoanResponse.class);

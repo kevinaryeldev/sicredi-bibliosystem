@@ -8,7 +8,7 @@ import br.com.kevinaryel.bibliosystem.request.ClientCreateRequest;
 import br.com.kevinaryel.bibliosystem.request.ClientEditRequest;
 import br.com.kevinaryel.bibliosystem.response.ClientResponse;
 import br.com.kevinaryel.bibliosystem.response.PageResponse;
-import br.com.kevinaryel.bibliosystem.utils.Validate;
+import br.com.kevinaryel.bibliosystem.utils.validate.Validate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ import java.util.Optional;
 public class ClientService {
     private final ObjectMapper objectMapper;
     private final ClientRepository clientRepository;
-    private final Validate validate = new Validate();
+    private final Validate validate;
 
     @Transactional
     public ResponseEntity<ClientResponse> create(ClientCreateRequest client) throws BusinessRuleException {
