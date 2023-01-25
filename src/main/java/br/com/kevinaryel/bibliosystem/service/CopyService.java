@@ -31,17 +31,9 @@ public class CopyService {
     private final BookRepository bookRepository;
     private final ObjectMapper objectMapper;
     private final Validate validate;
-
-    public void checkIdBook(Integer id) throws NotFoundException{
-        if (bookRepository.existsById(id)){
-         return;
-        }
-        throw new NotFoundException("Id do livro inválido");
-    }
-
     @Transactional
     public ResponseEntity<CopyResponse> create(CopyCreateRequest copy) throws BusinessRuleException, NotFoundException {
-        checkIdBook(copy.getId_book());
+        validate.validateIdBook(copy.getId_book());
         validate.validateString(copy.getProperty_code());
         validate.validateYear(copy.getYear());
         validate.validateEdition(copy.getEdition());
@@ -49,7 +41,6 @@ public class CopyService {
         copyEntity.setBook(bookRepository.findById(copy.getId_book()).get());
         CopyEntity copySaved = copyRepository.save(copyEntity);
         CopyResponse copyResponse = objectMapper.convertValue(copySaved, CopyResponse.class);
-        copyResponse.setId_book(copy.getId_book());
         return new ResponseEntity<>(copyResponse, HttpStatus.CREATED);
     }
 
@@ -76,8 +67,8 @@ public class CopyService {
         return new ResponseEntity<>(copyResponse, HttpStatus.OK);
     }
 
-    public ResponseEntity<PageResponse<CopyResponse>> list(Integer page, Integer size, Integer id_book) throws NotFoundException {
-        checkIdBook(id_book);
+    public ResponseEntity<PageResponse<CopyResponse>> list(Integer page, Integer size, Integer id_book) throws NotFoundException, BusinessRuleException {
+        validate.validateIdBook(id_book);
         if(page==null){
             page=0;
         }
@@ -91,10 +82,6 @@ public class CopyService {
                 .getContent()
                 .stream()
                 .map(copyEntity -> objectMapper.convertValue(copyEntity, CopyResponse.class))
-                .map(copyResponse -> {
-                    copyResponse.setId_book(id_book);
-                    return copyResponse;
-                })
                 .toList();
         PageResponse<CopyResponse> pageResponse = new PageResponse<>(repositoryPage.getTotalElements(),
             repositoryPage.getTotalPages(), page,size, copyList);

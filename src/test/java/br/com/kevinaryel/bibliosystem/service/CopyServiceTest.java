@@ -54,7 +54,6 @@ class CopyServiceTest {
         CopyEntity copyEntity = mock(CopyEntity.class);
         BookEntity bookEntity = mock(BookEntity.class);
         CopyResponse copyResponse = mock(CopyResponse.class);
-        when(bookRepository.existsById(copyCreateRequest.getId_book())).thenReturn(true);
         when(bookRepository.findById(copyCreateRequest.getId_book())).thenReturn(Optional.ofNullable(bookEntity));
         when(objectMapper.convertValue(copyCreateRequest, CopyEntity.class)).thenReturn(copyEntity);
         when(copyRepository.save(copyEntity)).thenReturn(copyEntity);
@@ -93,10 +92,9 @@ class CopyServiceTest {
     }
 
     @Test
-    void testlistCopyComSucesso() throws NotFoundException {
+    void testlistCopyComSucesso() throws NotFoundException, BusinessRuleException {
         List<CopyEntity> copyEntities = mock(List.class);
         Page<CopyEntity> copyEntityPage = mock(Page.class);
-        when(bookRepository.existsById(0)).thenReturn(true);
         when(copyRepository
                 .findCopyEntitiesByBook_Id(0,PageRequest.of(0,10, Sort.by("id"))))
                 .thenReturn(copyEntityPage);

@@ -43,10 +43,8 @@ class LoanServiceTest {
 
     @Mock
     private LoanRepository loanRepository;
-
     @Mock
     private Validate validate;
-
     @Mock
     private ObjectMapper objectMapper;
     @Mock
@@ -66,8 +64,7 @@ class LoanServiceTest {
         when(objectMapper.convertValue(loanCreateRequest,LoanEntity.class)).thenReturn(loanEntity);
         when(loanRepository.save(loanEntity)).thenReturn(loanEntity);
         //GenerateLoanResponse
-        when(loanMapper.mapToResponse(loanEntity)).thenReturn(loanResponse);
-        //
+        when(loanMapper.toLoanResponse(loanEntity)).thenReturn(loanResponse);
         ResponseEntity<LoanResponse> result = service.create(loanCreateRequest);
         Assert.assertEquals(result.getBody(), loanResponse);
         Assert.assertEquals(result.getStatusCode(), HttpStatus.CREATED);
@@ -93,18 +90,18 @@ class LoanServiceTest {
         ResponseEntity<PageResponse<LoanResponse>> result = service.findAllActive(0,10);
         Long longValue = loansList.size() * 1L;
         PageResponse<LoanResponse> comparator = new PageResponse<>(longValue,1,0,
-                10, loansList.stream().map(loanMapper::mapToResponse).collect(Collectors.toList()));
+                10, loansList.stream().map(loanMapper::toLoanResponse).collect(Collectors.toList()));
         Assert.assertEquals(result.getBody(), comparator);
     }
     @Test
-    public void testFindAllByClientIdSucess() throws NotFoundException {
+    public void testFindAllByClientIdSucess() throws NotFoundException, BusinessRuleException {
         List<LoanEntity> loansList = new ArrayList<>();
         loansList.add(new LoanEntity(1, 'A', LocalDate.now(),
                 LocalDate.now().plusDays(7), new CopyEntity(), new ClientEntity()));
         Page<LoanEntity> loanPage = new PageImpl<>(loansList);
         Sort orderBy = Sort.by(Sort.Direction.ASC, "status").and(Sort.by(Sort.Direction.DESC, "loan_date"));
         PageRequest pageRequest = PageRequest.of(0, 10, orderBy);
-        when(loanRepository.findByClient_Id(0, pageRequest)).thenReturn(loanPage);
+        when(loanRepository.findLoanEntitiesByClient_Id(0, pageRequest)).thenReturn(loanPage);
         ResponseEntity<PageResponse<LoanResponse>> result = service.findByClientId(null, null, 0);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(loanPage.getTotalElements(), result.getBody().getTotalElements());
