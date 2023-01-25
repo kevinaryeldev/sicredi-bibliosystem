@@ -1,12 +1,16 @@
 package br.com.kevinaryel.bibliosystem.utils.validate;
 
 import br.com.kevinaryel.bibliosystem.exception.BusinessRuleException;
+import br.com.kevinaryel.bibliosystem.repository.BookRepository;
 import br.com.kevinaryel.bibliosystem.repository.ClientRepository;
 import br.com.kevinaryel.bibliosystem.repository.CopyRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component("validate")
+@RequiredArgsConstructor
 public class Validate {
+    private final BookRepository bookRepository;
     public void validateIdCopy(Integer id_copy, CopyRepository repository) throws BusinessRuleException {
         if (id_copy != null){
             if (repository.existsById(id_copy)) {
@@ -33,9 +37,7 @@ public class Validate {
     }
     public void validateString(String string) throws BusinessRuleException {
         if (string != null){
-            if (string.matches("[A-Za-zÀ-ȕ0-9 ']{1,200}") ) {
-                return;
-            }
+            return;
         }
         throw new BusinessRuleException("Erro no campo string");
     }
@@ -96,5 +98,13 @@ public class Validate {
             }
         }
         throw new BusinessRuleException("Erro no id do cliente");
+    }
+
+    public void validateIdBook(Integer id_book) throws BusinessRuleException {
+        if (id_book != null){
+            if (bookRepository.existsById(id_book))
+                return;
+        }
+        throw new BusinessRuleException("Erro no id do livro");
     }
 }

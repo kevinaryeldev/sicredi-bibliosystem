@@ -29,7 +29,7 @@ public class LoanController {
         return loanService.findAllActive(page, size);
     }
     @GetMapping("/listar-por-id-cliente/{id}")
-    public ResponseEntity<PageResponse<LoanResponse>> listLoansByClientId(@PathVariable Integer id, Integer page, Integer size) throws NotFoundException {
+    public ResponseEntity<PageResponse<LoanResponse>> listLoansByClientId(@PathVariable Integer id, Integer page, Integer size) throws NotFoundException, BusinessRuleException {
         return loanService.findByClientId(page, size,id);
     }
 }

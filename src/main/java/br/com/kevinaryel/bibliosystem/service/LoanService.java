@@ -1,14 +1,14 @@
 package br.com.kevinaryel.bibliosystem.service;
 
+
 import br.com.kevinaryel.bibliosystem.entity.LoanEntity;
 import br.com.kevinaryel.bibliosystem.exception.BusinessRuleException;
 import br.com.kevinaryel.bibliosystem.exception.NotFoundException;
+import br.com.kevinaryel.bibliosystem.mapper.LoanMapper;
 import br.com.kevinaryel.bibliosystem.repository.ClientRepository;
 import br.com.kevinaryel.bibliosystem.repository.CopyRepository;
 import br.com.kevinaryel.bibliosystem.repository.LoanRepository;
 import br.com.kevinaryel.bibliosystem.request.LoanCreateRequest;
-import br.com.kevinaryel.bibliosystem.response.ClientResponse;
-import br.com.kevinaryel.bibliosystem.response.CopyResponse;
 import br.com.kevinaryel.bibliosystem.response.LoanResponse;
 import br.com.kevinaryel.bibliosystem.response.PageResponse;
 import br.com.kevinaryel.bibliosystem.utils.validate.Validate;
@@ -35,14 +35,7 @@ public class LoanService {
     private final ObjectMapper objectMapper;
     private final Validate validate;
 
-    private LoanResponse generateLoanResponse(LoanEntity loanSaved) {
-        LoanResponse loanResponse = objectMapper.convertValue(loanSaved, LoanResponse.class);
-        CopyResponse copy = objectMapper.convertValue(loanSaved.getCopy(), CopyResponse.class);
-        copy.setId_book(loanSaved.getCopy().getBook().getId());
-        loanResponse.setCopy(copy);
-        loanResponse.setClient(objectMapper.convertValue(loanSaved.getClient(), ClientResponse.class));
-        return loanResponse;
-    }
+    private final LoanMapper loanMapper;
 
 
     @Transactional
@@ -60,35 +53,28 @@ public class LoanService {
     public ResponseEntity<LoanResponse> create(LoanCreateRequest loanCreateRequest) throws BusinessRuleException {
         validate.validateIdCopy(loanCreateRequest.getId_copy(), copyRepository);
         validate.validateIdClient(loanCreateRequest.getId_client(), clientRepository);
-        LoanEntity loan = new LoanEntity(null,'A',
-                LocalDate.now(), LocalDate.now().plusDays(7),
-                copyRepository.findById(loanCreateRequest.getId_copy()).get(),
-                clientRepository.findById(loanCreateRequest.getId_client()).get()
-                );
+        LoanEntity loan = objectMapper.convertValue(loanCreateRequest, LoanEntity.class);
+        loan.setLoan_date(LocalDate.now());
+        loan.setReturn_date(LocalDate.now().plusDays(7));
+        loan.setStatus('A');
+        loan.setClient(clientRepository.findById(loanCreateRequest.getId_client()).get());
+        loan.setCopy(copyRepository.findById(loanCreateRequest.getId_copy()).get());
         LoanEntity loanSaved = loanRepository.save(loan);
-        LoanResponse loanResponse = generateLoanResponse(loanSaved);
+        LoanResponse loanResponse = objectMapper.convertValue(loanSaved, LoanResponse.class);
         return new ResponseEntity<>(loanResponse, HttpStatus.CREATED);
     }
-
-    public ResponseEntity<PageResponse<LoanResponse>> findByClientId(Integer page, Integer size, Integer id) throws NotFoundException {
+    public ResponseEntity<PageResponse<LoanResponse>> findByClientId(Integer page, Integer size, Integer id) throws BusinessRuleException {
+        validate.validateIdClient(id, clientRepository);
         if(page==null){
             page=0;
         }
         if (size==null){
             size=10;
         }
-        Sort orderBy = Sort.by(Sort.Direction.ASC, "status").and(Sort.by(Sort.Direction.DESC, "loan_date"));
+        Sort orderBy = Sort.by(Sort.Direction.ASC, "status");
         PageRequest pageRequest = PageRequest.of(page, size, orderBy);
-        Page<LoanEntity> repositoryPage = loanRepository.findByClient_Id(id, pageRequest);
-        List<LoanResponse> loans = repositoryPage.getContent()
-                .stream()
-                .map(loan -> {
-                    LoanResponse loanResponse = generateLoanResponse(loan);
-                    return loanResponse;
-                }).toList();
-        PageResponse<LoanResponse> pageResponse = new PageResponse<>(repositoryPage.getTotalElements(),
-                repositoryPage.getTotalPages(),page,size, loans);
-        return new ResponseEntity<>(pageResponse, HttpStatus.OK);
+        Page<LoanEntity> repositoryPage = loanRepository.findLoanEntitiesByClient_Id(id, pageRequest);
+        return generateListResponse(repositoryPage, page, size);
     }
 
     public ResponseEntity<PageResponse<LoanResponse>> findAllActive(Integer page, Integer size){
@@ -101,14 +87,16 @@ public class LoanService {
         Sort orderBy = Sort.by("id");
         PageRequest pageRequest = PageRequest.of(page, size, orderBy);
         Page<LoanEntity> repositoryPage = loanRepository.findByStatus('A', pageRequest);
-        List<LoanResponse> loans = repositoryPage.getContent()
+        return generateListResponse(repositoryPage, page, size);
+    }
+    private ResponseEntity<PageResponse<LoanResponse>> generateListResponse(Page<LoanEntity> repositoryPage,Integer page, Integer size){
+        List<LoanResponse> loanList = repositoryPage
+                .getContent()
                 .stream()
-                .map(loan -> {
-                    LoanResponse loanResponse = generateLoanResponse(loan);
-                    return loanResponse;
-                }).toList();
+                .map(loanEntity -> objectMapper.convertValue(loanEntity, LoanResponse.class))
+                .toList();
         PageResponse<LoanResponse> pageResponse = new PageResponse<>(repositoryPage.getTotalElements(),
-                repositoryPage.getTotalPages(),page,size, loans);
+                repositoryPage.getTotalPages(),page,size, loanList);
         return new ResponseEntity<>(pageResponse, HttpStatus.OK);
     }
 }

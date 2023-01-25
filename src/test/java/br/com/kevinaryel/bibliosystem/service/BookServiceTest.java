@@ -1,13 +1,11 @@
 package br.com.kevinaryel.bibliosystem.service;
 
 import br.com.kevinaryel.bibliosystem.entity.BookEntity;
-import br.com.kevinaryel.bibliosystem.entity.ClientEntity;
 import br.com.kevinaryel.bibliosystem.exception.BusinessRuleException;
 import br.com.kevinaryel.bibliosystem.exception.NotFoundException;
 import br.com.kevinaryel.bibliosystem.repository.BookRepository;
 import br.com.kevinaryel.bibliosystem.request.BookCreateRequest;
 import br.com.kevinaryel.bibliosystem.response.BookResponse;
-import br.com.kevinaryel.bibliosystem.response.ClientResponse;
 import br.com.kevinaryel.bibliosystem.response.PageResponse;
 import br.com.kevinaryel.bibliosystem.utils.validate.Validate;
 import com.fasterxml.jackson.databind.ObjectMapper;

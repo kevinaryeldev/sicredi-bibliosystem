@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,21 +30,10 @@ public class CopyService {
     private final CopyRepository copyRepository;
     private final BookRepository bookRepository;
     private final ObjectMapper objectMapper;
-
     private final Validate validate;
-
-    private void checkIdBook(Integer id) throws NotFoundException{
-        if ( id != null){
-            if (bookRepository.existsById(id)){
-             return;
-            }
-        }
-        throw new NotFoundException("Id do livro inválido");
-    }
-
     @Transactional
     public ResponseEntity<CopyResponse> create(CopyCreateRequest copy) throws BusinessRuleException, NotFoundException {
-        checkIdBook(copy.getId_book());
+        validate.validateIdBook(copy.getId_book());
         validate.validateString(copy.getProperty_code());
         validate.validateYear(copy.getYear());
         validate.validateEdition(copy.getEdition());
@@ -51,24 +41,25 @@ public class CopyService {
         copyEntity.setBook(bookRepository.findById(copy.getId_book()).get());
         CopyEntity copySaved = copyRepository.save(copyEntity);
         CopyResponse copyResponse = objectMapper.convertValue(copySaved, CopyResponse.class);
-        copyResponse.setId_book(copy.getId_book());
         return new ResponseEntity<>(copyResponse, HttpStatus.CREATED);
     }
 
     @Transactional
     public ResponseEntity<Void> delete(Integer id) throws NotFoundException {
-        if(!copyRepository.existsById(id)){
-            throw new NotFoundException("Id da cópia inválido");
-        }
+        getCopyEntityById(id);
         copyRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-    public ResponseEntity<CopyWithBookDetailsResponse> findById(Integer id) throws NotFoundException {
-        if(!copyRepository.existsById(id)){
+    private CopyEntity getCopyEntityById(Integer id) throws NotFoundException {
+        Optional<CopyEntity> copy = copyRepository.findById(id);
+        if (copy.isEmpty()){
             throw new NotFoundException("Id da cópia inválido");
         }
-        CopyEntity copyEntity = copyRepository.findById(id).get();
+        return copy.get();
+    }
+
+    public ResponseEntity<CopyWithBookDetailsResponse> findById(Integer id) throws NotFoundException {
+        CopyEntity copyEntity = getCopyEntityById(id);
         CopyWithBookDetailsResponse copyResponse = objectMapper.convertValue(copyEntity, CopyWithBookDetailsResponse.class);
         copyResponse.setId_book(copyEntity.getBook().getId());
         copyResponse.setTitle(copyEntity.getBook().getTitle());
@@ -76,8 +67,8 @@ public class CopyService {
         return new ResponseEntity<>(copyResponse, HttpStatus.OK);
     }
 
-    public ResponseEntity<PageResponse<CopyResponse>> list(Integer page, Integer size, Integer id_book) throws NotFoundException {
-        checkIdBook(id_book);
+    public ResponseEntity<PageResponse<CopyResponse>> list(Integer page, Integer size, Integer id_book) throws NotFoundException, BusinessRuleException {
+        validate.validateIdBook(id_book);
         if(page==null){
             page=0;
         }
@@ -91,10 +82,6 @@ public class CopyService {
                 .getContent()
                 .stream()
                 .map(copyEntity -> objectMapper.convertValue(copyEntity, CopyResponse.class))
-                .map(copyResponse -> {
-                    copyResponse.setId_book(id_book);
-                    return copyResponse;
-                })
                 .toList();
         PageResponse<CopyResponse> pageResponse = new PageResponse<>(repositoryPage.getTotalElements(),
             repositoryPage.getTotalPages(), page,size, copyList);

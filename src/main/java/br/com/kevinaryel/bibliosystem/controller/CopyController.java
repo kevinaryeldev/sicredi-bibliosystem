@@ -19,7 +19,7 @@ public class CopyController {
     private final CopyService copyService;
 
     @GetMapping("/listar/{id_book}")
-    public ResponseEntity<PageResponse<CopyResponse>> list(Integer page, Integer size, @PathVariable Integer id_book) throws NotFoundException {
+    public ResponseEntity<PageResponse<CopyResponse>> list(Integer page, Integer size, @PathVariable Integer id_book) throws NotFoundException, BusinessRuleException {
         return copyService.list(page,size,id_book);
     }
     @GetMapping("/busca-por-id/{id}")

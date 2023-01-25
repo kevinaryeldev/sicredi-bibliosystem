@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface LoanRepository extends JpaRepository<LoanEntity, Integer> {
 
-    Page<LoanEntity> findByClient_Id(Integer clientId, Pageable pageable);
+    Page<LoanEntity> findLoanEntitiesByClient_Id(Integer clientId, PageRequest pageRequest);
 
     Page<LoanEntity> findByStatus(Character status, PageRequest pageRequest);
 }
