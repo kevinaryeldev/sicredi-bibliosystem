@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,14 +30,11 @@ public class CopyService {
     private final CopyRepository copyRepository;
     private final BookRepository bookRepository;
     private final ObjectMapper objectMapper;
-
     private final Validate validate;
 
-    private void checkIdBook(Integer id) throws NotFoundException{
-        if ( id != null){
-            if (bookRepository.existsById(id)){
-             return;
-            }
+    public void checkIdBook(Integer id) throws NotFoundException{
+        if (bookRepository.existsById(id)){
+         return;
         }
         throw new NotFoundException("Id do livro inválido");
     }
@@ -57,18 +55,20 @@ public class CopyService {
 
     @Transactional
     public ResponseEntity<Void> delete(Integer id) throws NotFoundException {
-        if(!copyRepository.existsById(id)){
-            throw new NotFoundException("Id da cópia inválido");
-        }
+        getCopyEntityById(id);
         copyRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-    public ResponseEntity<CopyWithBookDetailsResponse> findById(Integer id) throws NotFoundException {
-        if(!copyRepository.existsById(id)){
+    private CopyEntity getCopyEntityById(Integer id) throws NotFoundException {
+        Optional<CopyEntity> copy = copyRepository.findById(id);
+        if (copy.isEmpty()){
             throw new NotFoundException("Id da cópia inválido");
         }
-        CopyEntity copyEntity = copyRepository.findById(id).get();
+        return copy.get();
+    }
+
+    public ResponseEntity<CopyWithBookDetailsResponse> findById(Integer id) throws NotFoundException {
+        CopyEntity copyEntity = getCopyEntityById(id);
         CopyWithBookDetailsResponse copyResponse = objectMapper.convertValue(copyEntity, CopyWithBookDetailsResponse.class);
         copyResponse.setId_book(copyEntity.getBook().getId());
         copyResponse.setTitle(copyEntity.getBook().getTitle());
